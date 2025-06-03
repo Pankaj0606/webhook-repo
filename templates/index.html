@@ -1,0 +1,99 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GitHub Webhook Events</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+<script>
+    function getOrdinalSuffix(day) {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+        case 1:  return 'st';
+        case 2:  return 'nd';
+        case 3:  return 'rd';
+        default: return 'th';
+    }
+}
+
+function formatCustomTimestamp(dateStr) {
+    const date = new Date(dateStr.replace(" - ", " "));
+    if (isNaN(date)) return "Invalid Date";
+
+    const day = date.getUTCDate();
+    const ordinal = getOrdinalSuffix(day);
+    const month = date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+    const year = date.getUTCFullYear();
+    const time = date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'UTC'
+    });
+
+    return `${day}${ordinal} ${month} ${year} - ${time} UTC`;
+}
+  async function fetchEvents() {
+    try {
+      const res = await fetch('/events');
+      if (!res.ok) throw new Error('Network response was not ok');
+      const data = await res.json();
+
+      const container = document.getElementById("events");
+      container.innerHTML = "";
+
+      data.forEach(event => {
+        const timestamp = formatCustomTimestamp(event.timestamp);
+        let text = "";
+        let iconClass = "";
+        if (event.action === "PUSH") {
+          text = `"${event.author}" pushed to "${event.to_branch}" on ${timestamp}`;
+          iconClass = "icon-push";
+        } else if (event.action === "PULL_REQUEST") {
+          text = `"${event.author}" submitted a pull request from "${event.from_branch}" to "${event.to_branch}" on ${timestamp}`;
+          iconClass = "icon-pull_request";
+        } else if (event.action === "MERGE") {
+          text = `"${event.author}" merged branch "${event.from_branch}" to "${event.to_branch}" on ${timestamp}`;
+          iconClass = "icon-merge";
+        }
+
+        const div = document.createElement("div");
+        div.className = "event-card";
+
+        const iconDiv = document.createElement("div");
+        iconDiv.className = `event-icon ${iconClass}`;
+
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "event-content";
+
+        const textDiv = document.createElement("div");
+        textDiv.className = "event-text";
+        textDiv.innerHTML = text;
+
+        const timeDiv = document.createElement("div");
+        timeDiv.className = "event-timestamp";
+        timeDiv.textContent = timestamp; // Already formatted correctly
+
+
+        contentDiv.appendChild(textDiv);
+        contentDiv.appendChild(timeDiv);
+        div.appendChild(iconDiv);
+        div.appendChild(contentDiv);
+
+        container.appendChild(div);
+      });
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  }
+
+  setInterval(fetchEvents, 15000);
+  window.onload = fetchEvents;
+</script>
+</head>
+<body>
+  <h1>GitHub Webhook Events</h1>
+  <div id="events"></div>
+</body>
+</html>

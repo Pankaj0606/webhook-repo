@@ -1,0 +1,75 @@
+/* static/css/styles.css */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7fa;
+  margin: 0; padding: 20px;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  color: #24292e;
+  margin-bottom: 30px;
+}
+
+#events {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.event-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: box-shadow 0.3s ease;
+}
+
+.event-card:hover {
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+}
+
+.event-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0366d6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-content {
+  flex-grow: 1;
+}
+
+.event-text {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.event-timestamp {
+  font-size: 0.85rem;
+  color: #6a737d;
+}
+
+.icon-push::before {
+  content: "⬆️";
+}
+
+.icon-pull_request::before {
+  content: "🔃";
+}
+
+.icon-merge::before {
+  content: "🔀";
+}
