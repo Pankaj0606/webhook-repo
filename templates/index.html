@@ -2,23 +2,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>GitHub Webhook Events</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
-<script>
-    function getOrdinalSuffix(day) {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GitHub Webhook Events</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <script>
+  function getOrdinalSuffix(day) {
     if (day > 3 && day < 21) return 'th';
     switch (day % 10) {
-        case 1:  return 'st';
-        case 2:  return 'nd';
-        case 3:  return 'rd';
-        default: return 'th';
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
     }
-}
+  }
 
-function formatCustomTimestamp(dateStr) {
-    const date = new Date(dateStr.replace(" - ", " "));
+  function formatCustomTimestamp(dateStr) {
+    const date = new Date(dateStr);
     if (isNaN(date)) return "Invalid Date";
 
     const day = date.getUTCDate();
@@ -26,14 +26,25 @@ function formatCustomTimestamp(dateStr) {
     const month = date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
     const year = date.getUTCFullYear();
     const time = date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: 'UTC'
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'UTC'
     });
 
     return `${day}${ordinal} ${month} ${year} - ${time} UTC`;
-}
+  }
+
+  // Check if event is within last 5 minutes from now
+  function isRecent(dateStr) {
+    const eventDate = new Date(dateStr);
+    const now = new Date();
+    // Calculate difference in milliseconds
+    const diffMs = now - eventDate;
+    const fiveMinutesMs = 5 * 60 * 1000;
+    return diffMs >= 0 && diffMs <= fiveMinutesMs;
+  }
+
   async function fetchEvents() {
     try {
       const res = await fetch('/events');
@@ -43,10 +54,14 @@ function formatCustomTimestamp(dateStr) {
       const container = document.getElementById("events");
       container.innerHTML = "";
 
-      data.forEach(event => {
+      // Filter events for only recent ones (within 5 minutes)
+      const recentEvents = data.filter(event => isRecent(event.timestamp));
+
+      recentEvents.forEach(event => {
         const timestamp = formatCustomTimestamp(event.timestamp);
         let text = "";
         let iconClass = "";
+
         if (event.action === "PUSH") {
           text = `"${event.author}" pushed to "${event.to_branch}" on ${timestamp}`;
           iconClass = "icon-push";
@@ -73,8 +88,7 @@ function formatCustomTimestamp(dateStr) {
 
         const timeDiv = document.createElement("div");
         timeDiv.className = "event-timestamp";
-        timeDiv.textContent = timestamp; // Already formatted correctly
-
+        timeDiv.textContent = timestamp;
 
         contentDiv.appendChild(textDiv);
         contentDiv.appendChild(timeDiv);
@@ -88,12 +102,18 @@ function formatCustomTimestamp(dateStr) {
     }
   }
 
+  function clearEvents() {
+    const container = document.getElementById("events");
+    container.innerHTML = "";
+  }
+
   setInterval(fetchEvents, 15000);
   window.onload = fetchEvents;
 </script>
 </head>
 <body>
   <h1>GitHub Webhook Events</h1>
+  <button onclick="clearEvents()">Refresh Logs</button>
   <div id="events"></div>
 </body>
 </html>

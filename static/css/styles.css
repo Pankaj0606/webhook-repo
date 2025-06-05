@@ -73,3 +73,29 @@ h1 {
 .icon-merge::before {
   content: "🔀";
 }
+
+button {
+  background-color: #007bff;   /* Bootstrap blue */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+}
+
+button:hover {
+  background-color: #0056b3;  /* Darker blue on hover */
+}
+
+button:active {
+  background-color: #003f7f;  /* Even darker on click */
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.5);
+}
+
